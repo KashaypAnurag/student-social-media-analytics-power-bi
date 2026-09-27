@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "student-social-media-analytics"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "4ea24d09-14ff-45bd-b53b-0bb5b17b2fe7"
+  }
+}

@@ -1,0 +1,6 @@
+relationship c9803e2e-703d-6ebb-f7b6-94e5c83c52f1
+	crossFilteringBehavior: bothDirections
+	fromCardinality: one
+	fromColumn: 'Platform Details'.Student_ID
+	toColumn: 'Student Details'.Student_ID
+

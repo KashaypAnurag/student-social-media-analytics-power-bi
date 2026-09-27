@@ -1,0 +1,111 @@
+table 'Platform Details'
+	lineageTag: 12c5b0f1-a375-4c44-8002-1b25f2196d3a
+
+	column Student_ID
+		dataType: int64
+		formatString: 0
+		lineageTag: bc18e845-cd3d-4562-920f-47a89b26cbdd
+		summarizeBy: none
+		sourceColumn: Student_ID
+
+		annotation SummarizationSetBy = Automatic
+
+	column Avg_Daily_Usage_Hours
+		dataType: double
+		lineageTag: 67329747-a5f1-4090-989e-ea0d542a548b
+		summarizeBy: sum
+		sourceColumn: Avg_Daily_Usage_Hours
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Most_Used_Platform
+		dataType: string
+		lineageTag: 13156ea4-29f5-4913-9e51-1f88606f8559
+		summarizeBy: none
+		sourceColumn: Most_Used_Platform
+
+		annotation SummarizationSetBy = Automatic
+
+	column Affects_Academic_Performance
+		dataType: string
+		lineageTag: b969df9c-97be-4959-9e8b-71eb762ce95f
+		summarizeBy: none
+		sourceColumn: Affects_Academic_Performance
+
+		annotation SummarizationSetBy = Automatic
+
+	column Sleep_Hours_Per_Night
+		dataType: double
+		lineageTag: 99d941ea-2528-453a-9fcc-00a1ad6fe9ee
+		summarizeBy: sum
+		sourceColumn: Sleep_Hours_Per_Night
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Mental_Health_Score
+		dataType: int64
+		formatString: 0
+		lineageTag: f6e4e377-9101-45a9-a7a1-128328f63721
+		summarizeBy: sum
+		sourceColumn: Mental_Health_Score
+
+		annotation SummarizationSetBy = Automatic
+
+	column Conflicts_Over_Social_Media
+		dataType: int64
+		formatString: 0
+		lineageTag: 38a6d1e2-adaf-4926-89e7-ee35b7220e38
+		summarizeBy: sum
+		sourceColumn: Conflicts_Over_Social_Media
+
+		annotation SummarizationSetBy = Automatic
+
+	column Addicted_Score
+		dataType: int64
+		formatString: 0
+		lineageTag: c442ba54-54a7-4103-8586-7c1ad6b2c899
+		summarizeBy: sum
+		sourceColumn: Addicted_Score
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Health Band' = IF('Platform Details'[Mental_Health_Score] >= 7, "Good", IF('Platform Details'[Mental_Health_Score]>= 4, "Average", "Poor"))
+		lineageTag: 346a2338-f5de-4577-b5b0-da1e82a83add
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Conflict Level' = SWITCH(TRUE(), 'Platform Details'[Conflicts_Over_Social_Media] > 5, "High",'Platform Details'[Conflicts_Over_Social_Media] > 2, "Medium", "Low")
+		lineageTag: 328311d9-5fd7-4a71-b997-09a46566cbdc
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Platform Details' = m
+		mode: import
+		source =
+				let
+				    Source = Excel.Workbook(File.Contents("C:\Users\Admin\Desktop\power bi\Project\4453437-Dataset\Dataset\Students Social Media Addiction.xlsx"), null, true),
+				    #"Platform Details_Sheet" = Source{[Item="Platform Details",Kind="Sheet"]}[Data],
+				    #"Promoted Headers" = Table.PromoteHeaders(#"Platform Details_Sheet", [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"Student_ID", Int64.Type}, {"Avg_Daily_Usage_Hours", type number}, {"Most_Used_Platform", type text}, {"Affects_Academic_Performance", type text}}),
+				    #"Trimmed Text" = Table.TransformColumns(Table.TransformColumnTypes(#"Changed Type", {{"Student_ID", type text}, {"Avg_Daily_Usage_Hours", type text}}, "en-IN"),{{"Student_ID", Text.Trim, type text}, {"Avg_Daily_Usage_Hours", Text.Trim, type text}}),
+				    #"Changed Type1" = Table.TransformColumnTypes(#"Trimmed Text",{{"Avg_Daily_Usage_Hours", type number}}),
+				    #"Trimmed Text1" = Table.TransformColumns(#"Changed Type1",{{"Most_Used_Platform", Text.Trim, type text}, {"Affects_Academic_Performance", Text.Trim, type text}}),
+				    #"Changed Type2" = Table.TransformColumnTypes(#"Trimmed Text1",{{"Student_ID", Int64.Type}}),
+				    #"Merged Queries" = Table.NestedJoin(#"Changed Type2", {"Student_ID"}, #"Student Details", {"Student_ID"}, "Student Details", JoinKind.LeftOuter),
+				    #"Duplicated Column" = Table.DuplicateColumn(#"Merged Queries", "Student Details", "Student Details - Copy"),
+				    #"Removed Columns" = Table.RemoveColumns(#"Duplicated Column",{"Student Details", "Student Details - Copy"}),
+				    #"Merged Queries1" = Table.NestedJoin(#"Removed Columns", {"Student_ID"}, #"Student Details", {"Student_ID"}, "Student Details", JoinKind.LeftOuter),
+				    #"Expanded Student Details" = Table.ExpandTableColumn(#"Merged Queries1", "Student Details", {"Sleep_Hours_Per_Night", "Mental_Health_Score", "Conflicts_Over_Social_Media", "Addicted_Score"}, {"Sleep_Hours_Per_Night", "Mental_Health_Score", "Conflicts_Over_Social_Media", "Addicted_Score"})
+				in
+				    #"Expanded Student Details"
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+

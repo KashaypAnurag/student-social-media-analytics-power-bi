@@ -1,0 +1,22 @@
+table DateTable
+	lineageTag: 326c2380-807c-4612-9e51-434dafc52f8a
+	dataCategory: Time
+
+	column Date
+		isKey
+		formatString: Short Date
+		lineageTag: 9433f5d9-e1df-4838-ac59-baed1eeeece2
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Date]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	partition DateTable = calculated
+		mode: import
+		source = CALENDAR(DATE(2023,1,1),DATE(2023,12,31))
+
+	annotation PBI_Id = 9d1b2e483cd24d95bb2b984c0f84d3af
+
